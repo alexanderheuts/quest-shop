@@ -1,13 +1,10 @@
 {
-  "itemGroup.examplemod": "Example Mod Tab",
-  "block.examplemod.example_block": "Example Block",
-  "item.examplemod.example_item": "Example Item",
-
-  "examplemod.configuration.title": "Example Mod Configs",
-  "examplemod.configuration.section.examplemod.common.toml": "Example Mod Configs",
-  "examplemod.configuration.section.examplemod.common.toml.title": "Example Mod Configs",
-  "examplemod.configuration.items": "Item List",
-  "examplemod.configuration.logDirtBlock": "Log Dirt Block",
-  "examplemod.configuration.magicNumberIntroduction": "Magic Number Text",
-  "examplemod.configuration.magicNumber": "Magic Number"
+  "reward.questshop.coins.amount": "Amount",
+  "reward.questshop.coins.title": "Coins: %s",
+  "command.questshop.player_only": "This command can only be used by a player.",
+  "command.questshop.no_team": "%s is not in a team.",
+  "command.questshop.coins_show": "%s's team has %s coins.",
+  "command.questshop.coins_added": "Added %s coins to %s. New total: %s.",
+  "command.questshop.coins_removed": "Removed %s coins from %s. New total: %s.",
+  "command.questshop.coins_set": "Set %s's team coins to %s."
 }
