@@ -1,14 +1,7 @@
 package com.holysweet.questshop;
 
 import com.holysweet.questshop.integrations.IntegrationBootstrap;
-import com.holysweet.questshop.commands.CoinsCommands;
-
-import com.mojang.brigadier.CommandDispatcher;
-import dev.architectury.event.events.common.CommandRegistrationEvent;
-
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.Commands.CommandSelection;
+import com.holysweet.questshop.registry.ModMenuTypes;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -37,6 +30,7 @@ public class QuestShop {
     public QuestShop(IEventBus modEventBus, ModContainer modContainer) {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
+        ModMenuTypes.MENU_TYPES.register(modEventBus);
 
         TeamEvent.COLLECT_PROPERTIES.register(this::onTeamCollectProperties);
         TeamEvent.PLAYER_LEFT_PARTY.register(TeamCoins::PlayerLeftPartyTeamEvent);
@@ -48,24 +42,12 @@ public class QuestShop {
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
 
-        CommandRegistrationEvent.EVENT.register(this::registerCommands);
-
-
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void onTeamCollectProperties(TeamCollectPropertiesEvent event) {
         event.add(TeamCoins.COINS);
-    }
-
-    private void registerCommands(
-            CommandDispatcher<CommandSourceStack> dispatcher,
-            CommandBuildContext ctx,
-            CommandSelection selection
-    ) {
-        // Your custom coins commands
-        CoinsCommands.register(dispatcher, ctx);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
