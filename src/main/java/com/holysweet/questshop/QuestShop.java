@@ -41,6 +41,9 @@ public class QuestShop {
         TeamEvent.COLLECT_PROPERTIES.register(this::onTeamCollectProperties);
         CoinsReward.bootstrap(); // triggers reward registration
 
+        TeamEvent.PLAYER_LEFT_PARTY.register(TeamCoins::PlayerLeftPartyTeamEvent);
+        TeamEvent.PLAYER_JOINED_PARTY.register(TeamCoins::PlayerJoinedPartyTeamEvent);
+
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
