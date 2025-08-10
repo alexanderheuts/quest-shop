@@ -1,4 +1,4 @@
-package com.holysweet.questshop.quests;
+package com.holysweet.questshop.integrations.ftbquests.reward;
 
 import com.holysweet.questshop.TeamCoins;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;

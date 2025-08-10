@@ -1,6 +1,6 @@
 package com.holysweet.questshop;
 
-import com.holysweet.questshop.quests.CoinsReward;
+import com.holysweet.questshop.integrations.IntegrationBootstrap;
 import com.holysweet.questshop.commands.CoinsCommands;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -39,11 +39,10 @@ public class QuestShop {
         modEventBus.addListener(this::commonSetup);
 
         TeamEvent.COLLECT_PROPERTIES.register(this::onTeamCollectProperties);
-        CoinsReward.bootstrap(); // triggers reward registration
-
         TeamEvent.PLAYER_LEFT_PARTY.register(TeamCoins::PlayerLeftPartyTeamEvent);
         TeamEvent.PLAYER_JOINED_PARTY.register(TeamCoins::PlayerJoinedPartyTeamEvent);
 
+        IntegrationBootstrap.bootstrap();
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.

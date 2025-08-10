@@ -32,6 +32,8 @@ public final class TeamCoins {
         if (prev instanceof PartyTeam && current instanceof PlayerTeam && deleted) {
             add(current, prev.getProperty(COINS));
             set(prev, 0);
+            current.markDirty();
+            prev.markDirty();
         }
     }
 
@@ -40,6 +42,8 @@ public final class TeamCoins {
         if (prev instanceof PlayerTeam && current instanceof PartyTeam) {
             add(current, prev.getProperty(COINS));
             set(prev, 0);
+            current.markDirty();
+            prev.markDirty();
         }
     }
 
