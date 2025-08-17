@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
-import dev.ftb.mods.ftbteams.api.event.*;
-
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
@@ -32,10 +30,6 @@ public class QuestShop {
         modEventBus.addListener(this::commonSetup);
         ModMenuTypes.MENU_TYPES.register(modEventBus);
 
-        TeamEvent.COLLECT_PROPERTIES.register(this::onTeamCollectProperties);
-        TeamEvent.PLAYER_LEFT_PARTY.register(TeamCoins::PlayerLeftPartyTeamEvent);
-        TeamEvent.PLAYER_JOINED_PARTY.register(TeamCoins::PlayerJoinedPartyTeamEvent);
-
         IntegrationBootstrap.bootstrap();
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
@@ -44,10 +38,6 @@ public class QuestShop {
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-    }
-
-    private void onTeamCollectProperties(TeamCollectPropertiesEvent event) {
-        event.add(TeamCoins.COINS);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

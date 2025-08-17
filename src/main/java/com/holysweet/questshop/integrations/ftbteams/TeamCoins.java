@@ -1,4 +1,4 @@
-package com.holysweet.questshop;
+package com.holysweet.questshop.integrations.ftbteams;
 
 import dev.ftb.mods.ftbteams.api.event.PlayerJoinedPartyTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.PlayerLeftPartyTeamEvent;

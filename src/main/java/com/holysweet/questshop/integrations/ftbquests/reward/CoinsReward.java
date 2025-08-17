@@ -1,6 +1,6 @@
 package com.holysweet.questshop.integrations.ftbquests.reward;
 
-import com.holysweet.questshop.TeamCoins;
+import com.holysweet.questshop.integrations.ftbteams.TeamCoins;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;

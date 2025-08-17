@@ -122,8 +122,13 @@ configurations {
 
 dependencies {
 
-    implementation("dev.ftb.mods:ftb-quests-neoforge:${ftb_quest_version}")
-    implementation("dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}") { transitive false }
+    // Optional at compile time; present only if the pack includes them
+    compileOnly("dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}")
+    compileOnly("dev.ftb.mods:ftb-quests-neoforge:${ftb_quest_version}")
+
+    // For your dev run configs so you can test with them:
+    runtimeOnly("dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}")
+    runtimeOnly("dev.ftb.mods:ftb-quests-neoforge:${ftb_quest_version}")
 
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

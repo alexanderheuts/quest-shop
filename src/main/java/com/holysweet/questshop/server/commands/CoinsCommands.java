@@ -1,6 +1,6 @@
 package com.holysweet.questshop.server.commands;
 
-import com.holysweet.questshop.TeamCoins;
+import com.holysweet.questshop.integrations.ftbteams.TeamCoins;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
