@@ -46,9 +46,15 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
         int bg = hovered ? 0x33FFFFFF : 0x22000000;
         gg.fill(left, top, left + rowWidth, top + rowHeight, bg);
 
-        gg.renderItem(this.icon, left + 2, top + 3);
+        // Item Icon
+        int iconX = left + 2;
+        int iconY = top + (rowHeight - 16) / 2; // item icon is 16px tall
+        gg.renderItem(this.icon, iconX, iconY);
+
+        // Item name
         gg.drawString(mc.font, this.name, left + 24, top + 6, 0xFFFFFF, false);
 
+        // Item count & cost
         int rx = left + rowWidth - 6 - mc.font.width(this.rightText);
         gg.drawString(mc.font, this.rightText, rx, top + 6, 0xFFD966, false);
     }

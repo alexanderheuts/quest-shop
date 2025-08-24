@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import com.holysweet.questshop.client.ClientShopData;
+import org.jetbrains.annotations.NotNull;
 
 public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
     private ShopList list;
@@ -26,8 +27,11 @@ public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
         int bottom = this.topPos + this.imageHeight - 12;
         int itemHeight = 22;
 
-        this.list = new ShopList(Minecraft.getInstance(), this.imageWidth, (bottom - top), top, itemHeight);
-        this.list.setX(this.leftPos + 4);
+        int innerX = this.leftPos + 4;
+        int innerWidth = this.imageWidth - 8;
+
+        this.list = new ShopList(Minecraft.getInstance(), innerWidth, (bottom - top), top, itemHeight);
+        this.list.setX(innerX);
         this.refreshEntries();
         this.addRenderableWidget(this.list);
 
@@ -36,7 +40,7 @@ public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
     }
 
     @Override
-    public void render(GuiGraphics gg, int mouseX, int mouseY, float partialTick) {
+    public void render(@NotNull GuiGraphics gg, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(gg, mouseX, mouseY, partialTick);
         super.render(gg, mouseX, mouseY, partialTick); // renders list
         this.renderTooltip(gg, mouseX, mouseY);

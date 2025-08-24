@@ -1,3 +1,4 @@
+// src/main/java/com/holysweet/questshop/client/screen/ShopList.java
 package com.holysweet.questshop.client.screen;
 
 import net.minecraft.client.Minecraft;
@@ -6,6 +7,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import java.util.List;
 
 public class ShopList extends ObjectSelectionList<ShopListEntry> {
+    private static final int SCROLLBAR_W = 6;
     private final int panelWidth;
 
     public ShopList(Minecraft mc, int width, int listHeight, int top, int itemHeight) {
@@ -18,22 +20,29 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         this.addEntry(entry);
     }
 
-    /** Fallback for replaceEntries(): clear and re-add. */
     public void setEntries(List<ShopListEntry> entries) {
-        this.children().clear();        // clear existing rows
+        this.children().clear();
         for (ShopListEntry e : entries) {
-            this.addEntry(e);           // re-add each row
+            this.addEntry(e);
         }
-        this.setScrollAmount(0);        // reset scroll so content is visible
+        this.setScrollAmount(0);
     }
 
+    /** Make rows start exactly at the list's X (no automatic centering). */
+    @Override
+    public int getRowLeft() {
+        return this.getX();
+    }
+
+    /** Let rows span up to the scrollbar (no extra padding). */
     @Override
     public int getRowWidth() {
-        return this.panelWidth - 16;    // keep padding from scrollbar
+        return this.panelWidth - SCROLLBAR_W;
     }
 
+    /** Keep the scrollbar flush with the right edge of the list. */
     @Override
     protected int getScrollbarPosition() {
-        return this.getX() + this.panelWidth - 6;
+        return this.getX() + this.panelWidth - SCROLLBAR_W;
     }
 }
