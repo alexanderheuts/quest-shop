@@ -110,14 +110,22 @@ public final class Net {
         }
 
         // 4) Try to give items
+        // Give all items: fill inventory first, then drop any leftover
         ItemStack stack = new ItemStack(item.get(), Math.max(1, p.amount()));
-        if (!sp.getInventory().add(stack)) {
-            sendBuyResult(sp, BuyResultPayload.Code.NO_INVENTORY_SPACE);
-            return;
-        }
+        giveOrDrop(sp, stack);
 
         // 5) Deduct coins and sync
         CoinsService.add(level, sp, -p.cost());    // auto-sync via CoinsService
         Net.sendBuyResult(sp, BuyResultPayload.Code.OK);
+    }
+
+    private static void giveOrDrop(ServerPlayer sp, ItemStack toGive) {
+        // Try to insert as much as possible; 'left' becomes the remainder
+        ItemStack left = toGive.copy();
+        boolean fullyAdded = sp.getInventory().add(left);
+        if (!fullyAdded && !left.isEmpty()) {
+            // Drop the exact leftover on the ground (not random scatter)
+            sp.drop(left, false);
+        }
     }
 }
