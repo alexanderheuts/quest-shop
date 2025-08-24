@@ -6,5 +6,10 @@
   "command.questshop.coins_show": "%s's team has %s coins.",
   "command.questshop.coins_added": "Added %s coins to %s. New total: %s.",
   "command.questshop.coins_removed": "Removed %s coins from %s. New total: %s.",
-  "command.questshop.coins_set": "Set %s's team coins to %s."
+  "command.questshop.coins_set": "Set %s's team coins to %s.",
+  "questshop.buy.ok": "Purchase successful!",
+  "questshop.buy.invalid": "This shop entry is no longer available.",
+  "questshop.buy.no_coins": "Not enough coins.",
+  "questshop.buy.no_space": "No inventory space.",
+  "questshop.buy.locked": "Category is locked."
 }
