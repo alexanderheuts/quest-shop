@@ -11,5 +11,7 @@
   "questshop.buy.invalid": "This shop entry is no longer available.",
   "questshop.buy.no_coins": "Not enough coins.",
   "questshop.buy.no_space": "No inventory space.",
-  "questshop.buy.locked": "Category is locked."
+  "questshop.buy.locked": "Category is locked.",
+  "questshop.buy.failed": "Purchase failed",
+  "questshop.buy.toast.detail": "Bought x%1$s %2$s (-%3$s coins)"
 }

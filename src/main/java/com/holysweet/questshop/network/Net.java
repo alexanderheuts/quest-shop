@@ -3,13 +3,11 @@ package com.holysweet.questshop.network;
 import com.holysweet.questshop.QuestShop;
 import com.holysweet.questshop.api.ShopEntry;
 import com.holysweet.questshop.client.ClientCoins;
+import com.holysweet.questshop.client.ClientFX;
 import com.holysweet.questshop.data.ShopCatalog;
-import com.holysweet.questshop.network.payload.BuyEntryPayload;
-import com.holysweet.questshop.network.payload.BuyResultPayload;
-import com.holysweet.questshop.network.payload.CoinsBalancePayload;
+import com.holysweet.questshop.network.payload.*;
 import com.holysweet.questshop.service.CoinsService;
 import com.holysweet.questshop.client.ClientShopData;
-import com.holysweet.questshop.network.payload.ShopDataPayload;
 import net.minecraft.client.Minecraft;
 import com.holysweet.questshop.client.screen.ShopMenuScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -42,15 +40,15 @@ public final class Net {
                 ctx.enqueueWork(() -> ClientCoins.set(payload.balance()))
         );
 
-        // S2C: buy result feedback (simple for now; wire a toast later)
+        // S2C: buy result feedback
         reg.playToClient(BuyResultPayload.TYPE, BuyResultPayload.CODEC, (payload, ctx) ->
                 ctx.enqueueWork(() -> {
                     switch (payload.code()) {
-                        case OK -> ctx.player().displayClientMessage(Component.translatable("questshop.buy.ok"), true);
-                        case INVALID_ENTRY -> ctx.player().displayClientMessage(Component.translatable("questshop.buy.invalid"), true);
-                        case NOT_ENOUGH_COINS -> ctx.player().displayClientMessage(Component.translatable("questshop.buy.no_coins"), true);
-                        case NO_INVENTORY_SPACE -> ctx.player().displayClientMessage(Component.translatable("questshop.buy.no_space"), true);
-                        case LOCKED_CATEGORY -> ctx.player().displayClientMessage(Component.translatable("questshop.buy.locked"), true);
+                        case INVALID_ENTRY -> ClientFX.purchaseError(Component.translatable("questshop.buy.invalid"));
+                        case NOT_ENOUGH_COINS -> ClientFX.purchaseError(Component.translatable("questshop.buy.no_coins"));
+                        case NO_INVENTORY_SPACE -> ClientFX.purchaseError(Component.translatable("questshop.buy.no_space"));
+                        case LOCKED_CATEGORY -> ClientFX.purchaseError(Component.translatable("questshop.buy.locked"));
+                        case OK -> { /* handled by BuyOkToastPayload */ }
                     }
                 })
         );
@@ -64,6 +62,11 @@ public final class Net {
                         s.refreshEntries();
                     }
                 })
+        );
+
+        // S2C: purchase OK
+        reg.playToClient(BuyOkToastPayload.TYPE, BuyOkToastPayload.CODEC, (payload, ctx) ->
+                ctx.enqueueWork(() -> ClientFX.purchaseOk(payload.itemId(), payload.amount(), payload.cost()))
         );
 
         // C2S: buy request
@@ -137,6 +140,8 @@ public final class Net {
 
         // 5) Deduct coins and sync
         CoinsService.add(level, sp, -p.cost());    // auto-sync via CoinsService
+        PacketDistributor.sendToPlayer(sp,
+                new BuyOkToastPayload(p.itemId(), Math.max(1, p.amount()), p.cost()));
         Net.sendBuyResult(sp, BuyResultPayload.Code.OK);
     }
 
