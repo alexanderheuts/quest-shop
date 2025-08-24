@@ -1,25 +1,83 @@
+## QuestShop
 
-Installation information
-=======
+QuestShop is a lightweight Minecraft (NeoForge) mod that provides an in-game shop and reward progression system.
+It is designed for modpack makers to support controlled item access, team play, and quest progression.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+### 🎯 Purpose
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+* Provide a configurable shop where players can spend earned rewards. 
+* Support progression gating — rewards and purchases can be tied to team progress or quest completion.
+* Stay lightweight and flexible for modpack integration.
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+### 🔌 Integrations
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+QuestShop works on its own, but offers optional integration with:
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+* FTB Teams – for shared team progression.
+* FTB Quests – for quest-based rewards or unlocks. 
+
+_No hard dependencies: packs can include QuestShop standalone or alongside these mods._
+
+---
+
+### ⚙️ Shop Configuration
+
+All shop content is defined via datapacks.
+
+#### Shop category
+```
+data/yourpack/questshop/shop_categories/building.json
+```
+
+```
+{ "display": "Building", "unlocked_by_default": true, "order": 30 }
+```
+
+* The filename determines the category ID. 
+* One file per category.
+* display - name shown in game.
+* unlocked_by_default - is the category, and its items, unlocked by default
+* order - integer for default ordering, compared to other categories, higher is lower on the list
+
+#### Shop entry
+```
+data/yourpack/questshop/shop_entries/building_basic.json
+```
+
+```
+[
+  { 
+    "item": "minecraft:cobblestone",
+    "amount": 64, 
+    "cost": 2,  
+    "category": "building" 
+  },
+  { 
+    "item": "minecraft:oak_planks",
+    "amount": 64, 
+    "cost": 2,  
+    "category": "building" 
+  }
+]
+```
+* Filenames are arbitrary. Used for your own grouping.
+* item - minecraft item ID to sell.
+* amount - the amount you get when purchased. 
+* price - cost in the built-in currency.
+* category - category ID the item belongs to.
+
+Folder structure (datapack):
+```
+(your_datapack)/
+pack.mcmeta
+data/
+  yourpack/
+    questshop/
+      shop_categories/
+        building.json
+      shop_entries/
+        building_basic.json
+```
+
+See [repository](https://github.com/alexanderheuts/quest-shop/tree/main/src/main/resources/datapacks/questshop_examples) for example datapack.
+
