@@ -1,32 +1,39 @@
 package com.holysweet.questshop.client.screen;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 
-public class ShopList extends ObjectSelectionList<ShopListEntry> {
-    private final int left;
+import java.util.List;
 
-    public ShopList(Minecraft mc,
-                    int width,
-                    int height,
-                    int left,
-                    int top,
-                    int itemHeight) {
-        // 1.21 signature
-        super(mc, width, height, top, itemHeight);
-        this.left = left;
+public class ShopList extends ObjectSelectionList<ShopListEntry> {
+    private final int panelWidth;
+
+    public ShopList(Minecraft mc, int width, int listHeight, int top, int itemHeight) {
+        super(mc, width, listHeight, top, itemHeight);
+        this.panelWidth = width;
     }
 
-    /** Public wrappers (super methods are protected). */
-    public void addRow(ShopListEntry entry) { super.addEntry(entry); }
-    public void clearRows()                { super.clearEntries(); }
+    /** Public helper since addEntry is protected. */
+    public void add(ShopListEntry entry) {
+        this.addEntry(entry);
+    }
 
-    @Override public int  getRowWidth()            { return this.width - 10; }
-    @Override public int  getRowLeft()             { return this.left + 5; }
-    @Override protected int getScrollbarPosition() { return this.left + this.width - 6; }
+    /** Fallback for replaceEntries(): clear and re-add. */
+    public void setEntries(List<ShopListEntry> entries) {
+        this.children().clear();        // clear existing rows
+        for (ShopListEntry e : entries) {
+            this.addEntry(e);           // re-add each row
+        }
+        this.setScrollAmount(0);        // reset scroll so content is visible
+    }
 
-    // Silence vanilla decorations/background so the list stays inside your panel.
-    @Override protected void renderDecorations(GuiGraphics g, int mouseX, int mouseY) {}
-    @Override protected void renderListBackground(GuiGraphics g) {}
+    @Override
+    public int getRowWidth() {
+        return this.panelWidth - 16;    // keep padding from scrollbar
+    }
+
+    @Override
+    protected int getScrollbarPosition() {
+        return this.getX() + this.panelWidth - 6;
+    }
 }

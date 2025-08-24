@@ -8,6 +8,10 @@ import com.holysweet.questshop.network.payload.BuyEntryPayload;
 import com.holysweet.questshop.network.payload.BuyResultPayload;
 import com.holysweet.questshop.network.payload.CoinsBalancePayload;
 import com.holysweet.questshop.service.CoinsService;
+import com.holysweet.questshop.client.ClientShopData;
+import com.holysweet.questshop.network.payload.ShopDataPayload;
+import net.minecraft.client.Minecraft;
+import com.holysweet.questshop.client.screen.ShopMenuScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -51,6 +55,17 @@ public final class Net {
                 })
         );
 
+        // S2C: shop data
+        reg.playToClient(ShopDataPayload.TYPE, ShopDataPayload.CODEC, (payload, ctx) ->
+                ctx.enqueueWork(() -> {
+                    ClientShopData.set(payload.entries());
+                    // If shop is open, refresh immediately
+                    if (Minecraft.getInstance().screen instanceof ShopMenuScreen s) {
+                        s.refreshEntries();
+                    }
+                })
+        );
+
         // C2S: buy request
         reg.playToServer(BuyEntryPayload.TYPE, BuyEntryPayload.CODEC, (payload, ctx) ->
                 ctx.enqueueWork(() -> handleBuy(ctx.player(), payload))
@@ -70,6 +85,12 @@ public final class Net {
 
     public static void sendBuyResult(ServerPlayer player, BuyResultPayload.Code code) {
         PacketDistributor.sendToPlayer(player, new BuyResultPayload(code));
+    }
+
+    public static void sendShopData(ServerPlayer player) {
+        // Build from authoritative server catalog
+        var list = ShopCatalog.INSTANCE.allEntries();
+        PacketDistributor.sendToPlayer(player, new ShopDataPayload(list));
     }
 
     // ---------- server buy logic (compact + readable) ----------
