@@ -5,17 +5,25 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class ShopList extends ObjectSelectionList<ShopListEntry> {
-    private static final int SCROLLBAR_W = 6;
-    private final int panelWidth;
+    private static final int SCROLLBAR_W     = 6; // visual width of the bar
+    private static final int SCROLL_HIT_GUTTER = 6; // extra px to stay away from the bar hitbox
+    private static final int HITBOX_FUDGE    = 0; // shrink hitbox by a couple pixel
+
+    private int panelWidth;
 
     public ShopList(Minecraft mc, int width, int listHeight, int top, int itemHeight) {
-        super(mc, width, listHeight, top, itemHeight);
+        super(mc, width - SCROLLBAR_W, listHeight, top, itemHeight);
         this.panelWidth = width;
+    }
+
+    @Override
+    public void setWidth(int width) {
+        super.setWidth(width - SCROLLBAR_W);
+        this.panelWidth = width; // keep our cached width in sync
     }
 
     /** Public helper since addEntry is protected. */
@@ -25,9 +33,7 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
 
     public void setEntries(List<ShopListEntry> entries) {
         this.children().clear();
-        for (ShopListEntry e : entries) {
-            this.addEntry(e);
-        }
+        for (ShopListEntry e : entries) this.addEntry(e);
         this.setScrollAmount(0);
     }
 
@@ -36,18 +42,18 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         int count = this.getItemCount();
         if (count == 0) return;
 
-        int left      = this.getRowLeft();
-        int rowWidth  = this.getRowWidth();
-        int rowHeight = this.itemHeight;
+        int left       = this.getRowLeft();
+        int drawWidth  = this.getScrollbarPosition() - left;   // full visual width (no gutter)
+        int rowHeight  = this.itemHeight;
 
         int viewTop    = this.getY();
         int viewBottom = this.getBottom();
 
-        // (optional) compact the header gap above the first row
+        // single top line above first row
         if (count > 0) {
             int firstTop = this.getRowTop(0);
             if (firstTop > viewTop) {
-                gfx.fill(left, firstTop - 1, left + rowWidth, firstTop, 0xFF2E2E2E); // single top line
+                gfx.fill(left, firstTop - 1, left + drawWidth, firstTop, 0xFF2E2E2E);
             }
         }
 
@@ -56,20 +62,23 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
             int bottom = top + rowHeight;
 
             if (bottom >= viewTop && top <= viewBottom) {
-                // (gfx, mouseX, mouseY, partial, index, left, top, width, height)
-                this.renderItem(gfx, mouseX, mouseY, partial, i, left, top, rowWidth, rowHeight);
+                // hovered based on hit region (stays away from scrollbar)
+                boolean hovered = mouseY >= top && mouseY < bottom
+                        && mouseX >= left && mouseX < left + drawWidth;
+
+                // draw using full visual width (no gutter)
+                ShopListEntry entry = this.children().get(i);
+                entry.render(gfx, i, top, left, drawWidth, rowHeight, mouseX, mouseY, hovered, partial);
             }
 
-            // 3px separator inside this row’s last 3 pixels: dark–light–dark
-            int yD1 = bottom - 3;
-            int yL  = bottom - 2;
-            int yD2 = bottom - 1;
-
-            if (yD1 >= viewTop && yD1 < viewBottom) gfx.fill(left, yD1, left + rowWidth, yD1 + 1, 0xFF1E1E1E);
-            if (yL  >= viewTop && yL  < viewBottom) gfx.fill(left, yL,  left + rowWidth, yL  + 1, 0xFF3A3A3A);
-            if (yD2 >= viewTop && yD2 < viewBottom) gfx.fill(left, yD2, left + rowWidth, yD2 + 1, 0xFF1E1E1E);
+            // 3px separator: dark–light–dark at full visual width
+            int yD1 = bottom - 3, yL = bottom - 2, yD2 = bottom - 1;
+            if (yD1 >= viewTop && yD1 < viewBottom) gfx.fill(left, yD1, left + drawWidth, yD1 + 1, 0xFF1E1E1E);
+            if (yL  >= viewTop && yL  < viewBottom) gfx.fill(left, yL,  left + drawWidth, yL  + 1, 0xFF3A3A3A);
+            if (yD2 >= viewTop && yD2 < viewBottom) gfx.fill(left, yD2, left + drawWidth, yD2 + 1, 0xFF1E1E1E);
         }
     }
+
 
     /** Make rows start exactly at the list's X (no automatic centering). */
     @Override
@@ -77,10 +86,10 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         return this.getX();
     }
 
-    /** Let rows span up to the scrollbar (no extra padding). */
+    /** Let rows stop well before the scrollbar so hover/clicks never leak under it. */
     @Override
     public int getRowWidth() {
-        return this.panelWidth - SCROLLBAR_W;
+        return super.getRowWidth();
     }
 
     /** Keep the scrollbar flush with the right edge of the list. */
