@@ -1,4 +1,3 @@
-// src/main/java/com/holysweet/questshop/client/screen/ShopList.java
 package com.holysweet.questshop.client.screen;
 
 import net.minecraft.client.Minecraft;
@@ -10,8 +9,6 @@ import java.util.List;
 
 public class ShopList extends ObjectSelectionList<ShopListEntry> {
     private static final int SCROLLBAR_W     = 6; // visual width of the bar
-    private static final int SCROLL_HIT_GUTTER = 6; // extra px to stay away from the bar hitbox
-    private static final int HITBOX_FUDGE    = 0; // shrink hitbox by a couple pixel
 
     private int panelWidth;
 
@@ -23,7 +20,7 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
     @Override
     public void setWidth(int width) {
         super.setWidth(width - SCROLLBAR_W);
-        this.panelWidth = width; // keep our cached width in sync
+        this.panelWidth = width;
     }
 
     /** Public helper since addEntry is protected. */
@@ -43,7 +40,7 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         if (count == 0) return;
 
         int left       = this.getRowLeft();
-        int drawWidth  = this.getScrollbarPosition() - left;   // full visual width (no gutter)
+        int drawWidth  = this.getScrollbarPosition() - left;
         int rowHeight  = this.itemHeight;
 
         int viewTop    = this.getY();
@@ -62,11 +59,11 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
             int bottom = top + rowHeight;
 
             if (bottom >= viewTop && top <= viewBottom) {
-                // hovered based on hit region (stays away from scrollbar)
+                // hovered based on hit region
                 boolean hovered = mouseY >= top && mouseY < bottom
                         && mouseX >= left && mouseX < left + drawWidth;
 
-                // draw using full visual width (no gutter)
+                // draw using full visual width
                 ShopListEntry entry = this.children().get(i);
                 entry.render(gfx, i, top, left, drawWidth, rowHeight, mouseX, mouseY, hovered, partial);
             }
