@@ -6,6 +6,7 @@ import com.holysweet.questshop.client.ClientCoins;
 import com.holysweet.questshop.client.ClientFX;
 import com.holysweet.questshop.data.ShopCatalog;
 import com.holysweet.questshop.network.payload.*;
+import com.holysweet.questshop.service.CategoriesService;
 import com.holysweet.questshop.service.CoinsService;
 import com.holysweet.questshop.client.ClientShopData;
 import net.minecraft.client.Minecraft;
@@ -53,6 +54,15 @@ public final class Net {
                 })
         );
 
+        // S2C: Category data
+        reg.playToClient(CategoriesSnapshotPayload.TYPE, CategoriesSnapshotPayload.CODEC, (payload, ctx) ->
+                ctx.enqueueWork(() -> {
+                    if (Minecraft.getInstance().screen instanceof ShopMenuScreen s) {
+                        s.refreshEntries();
+                    }
+                })
+        );
+
         // S2C: shop data
         reg.playToClient(ShopDataPayload.TYPE, ShopDataPayload.CODEC, (payload, ctx) ->
                 ctx.enqueueWork(() -> {
@@ -96,6 +106,12 @@ public final class Net {
         PacketDistributor.sendToPlayer(player, new ShopDataPayload(list));
     }
 
+    public static void sendCategoriesSnapshot(ServerPlayer player) {
+        var cats = CategoriesService.categories();
+        var unlocked = CategoriesService.effectiveUnlocked(player);
+        PacketDistributor.sendToPlayer(player, new CategoriesSnapshotPayload(cats, unlocked));
+    }
+
     // ---------- server buy logic (compact + readable) ----------
 
     private static void handleBuy(Player player, BuyEntryPayload p) {
@@ -124,21 +140,25 @@ public final class Net {
             return;
         }
 
-        // TODO: (Unlocks intentionally omitted for now; everything is considered unlocked.)
+        // 3) Check if the category is unlocked
+        if (!CategoriesService.isUnlocked(sp, p.category())) {
+            sendBuyResult(sp, BuyResultPayload.Code.LOCKED_CATEGORY);
+            return;
+        }
 
-        // 3) Check coins
+        // 4) Check coins
         int balance = CoinsService.get(level, sp);
         if (balance < p.cost()) {
             sendBuyResult(sp, BuyResultPayload.Code.NOT_ENOUGH_COINS);
             return;
         }
 
-        // 4) Try to give items
+        // 5) Try to give items
         // Give all items: fill inventory first, then drop any leftover
         ItemStack stack = new ItemStack(item.get(), Math.max(1, p.amount()));
         giveOrDrop(sp, stack);
 
-        // 5) Deduct coins and sync
+        // 6) Deduct coins and sync
         CoinsService.add(level, sp, -p.cost());    // auto-sync via CoinsService
         PacketDistributor.sendToPlayer(sp,
                 new BuyOkToastPayload(p.itemId(), Math.max(1, p.amount()), p.cost()));

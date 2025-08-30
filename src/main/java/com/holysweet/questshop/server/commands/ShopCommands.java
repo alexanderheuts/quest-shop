@@ -1,10 +1,12 @@
 // src/main/java/com/holysweet/questshop/server/commands/ShopCommands.java
 package com.holysweet.questshop.server.commands;
 
+import com.holysweet.questshop.api.ShopCategory;
 import com.holysweet.questshop.api.ShopEntry;
 import com.holysweet.questshop.data.ShopCatalog;
 import com.holysweet.questshop.menu.ShopMenu;
 import com.holysweet.questshop.network.Net;
+import com.holysweet.questshop.server.commands.util.CategoriesCommandUtil;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -47,8 +49,10 @@ public final class ShopCommands {
                 .then(Commands.literal("list-entries")
                         .requires(src -> src.hasPermission(2))
                         .then(Commands.argument("category", ResourceLocationArgument.id())
+                                .suggests(CategoriesCommandUtil.CATEGORY_SUGGESTIONS)
                                 .executes(ctx -> {
-                                    ResourceLocation catId = ResourceLocationArgument.getId(ctx, "category");
+                                    ResourceLocation raw = ResourceLocationArgument.getId(ctx, "category");
+                                    ResourceLocation catId = CategoriesCommandUtil.resolve(raw);
                                     return listEntries(ctx.getSource(), catId);
                                 })));
     }
@@ -65,6 +69,7 @@ public final class ShopCommands {
         player.openMenu(SHOP_PROVIDER);
         Net.syncBalance(player);
         Net.sendShopData(player);
+        Net.sendCategoriesSnapshot(player);
         return 1;
     }
 
@@ -72,7 +77,7 @@ public final class ShopCommands {
 
     private static int listCategories(CommandSourceStack src) {
         // Use the real value type to keep generics intact
-        Map<ResourceLocation, com.holysweet.questshop.api.ShopCategory> cats =
+        Map<ResourceLocation, ShopCategory> cats =
                 com.holysweet.questshop.data.ShopCatalog.INSTANCE.categories();
 
         src.sendSuccess(() -> Component.literal("QuestShop: " + cats.size() + " categories"), false);
@@ -80,7 +85,7 @@ public final class ShopCommands {
         cats.entrySet().stream()
                 .sorted(
                         Comparator
-                                .comparingInt((Map.Entry<ResourceLocation, com.holysweet.questshop.api.ShopCategory> e) -> e.getValue().order())
+                                .comparingInt((Map.Entry<ResourceLocation, ShopCategory> e) -> e.getValue().order())
                                 .thenComparing(e -> e.getKey().toString())
                 )
                 .forEach(e -> {

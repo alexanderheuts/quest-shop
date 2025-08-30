@@ -11,6 +11,7 @@ public final class HqsCommands {
     public static void register(CommandDispatcher<CommandSourceStack> d, CommandBuildContext ctx) {
         var root = Commands.literal("hqs");
         root.then(CoinsCommands.subtree());
+        root.then(CategoriesCommands.subtree());
         root.then(ShopCommands.subtree());
         d.register(root);
     }
