@@ -25,7 +25,7 @@ public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
         super.init(); // sets leftPos/topPos
         int top = this.topPos + 24;
         int bottom = this.topPos + this.imageHeight - 12;
-        int itemHeight = 22;
+        int itemHeight = 21;
 
         int innerX = this.leftPos + 4;
         int innerWidth = this.imageWidth - 8;

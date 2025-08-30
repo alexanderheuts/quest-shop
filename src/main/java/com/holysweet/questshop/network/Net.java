@@ -2,6 +2,7 @@ package com.holysweet.questshop.network;
 
 import com.holysweet.questshop.QuestShop;
 import com.holysweet.questshop.api.ShopEntry;
+import com.holysweet.questshop.client.ClientCategories;
 import com.holysweet.questshop.client.ClientCoins;
 import com.holysweet.questshop.client.ClientFX;
 import com.holysweet.questshop.data.ShopCatalog;
@@ -57,6 +58,7 @@ public final class Net {
         // S2C: Category data
         reg.playToClient(CategoriesSnapshotPayload.TYPE, CategoriesSnapshotPayload.CODEC, (payload, ctx) ->
                 ctx.enqueueWork(() -> {
+                    ClientCategories.applySnapshot(payload.categories(), payload.unlocked());
                     if (Minecraft.getInstance().screen instanceof ShopMenuScreen s) {
                         s.refreshEntries();
                     }

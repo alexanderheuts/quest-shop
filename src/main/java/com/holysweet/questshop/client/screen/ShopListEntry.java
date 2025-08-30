@@ -3,6 +3,7 @@ package com.holysweet.questshop.client.screen;
 import com.holysweet.questshop.api.ShopEntry;
 import com.holysweet.questshop.client.ClientCoins;
 import com.holysweet.questshop.client.ClientFX;
+import com.holysweet.questshop.client.ClientCategories; // needs to expose isUnlocked(ResourceLocation)
 import com.holysweet.questshop.network.payload.BuyEntryPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,30 +36,40 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
     @Override
     public void render(GuiGraphics gg, int index, int top, int left, int rowWidth, int rowHeight,
                        int mouseX, int mouseY, boolean hovered, float partialTick) {
+        boolean categoryUnlocked = ClientCategories.isUnlocked(this.data.category());
         boolean affordable = ClientCoins.get() >= this.data.cost();
 
-        // Background
-        int bg = hovered ? 0x33FFFFFF : 0x22000000;
-        gg.fill(left, top, left + rowWidth, top + rowHeight, bg);
+        // Keep entry content in an 18px band: 1 top pad, 16 content, 1 bottom pad
+        final int contentTop    = top;
+        final int contentBottom = top + 18; // exclusive (top + 1 + 16 + 1)
 
-        // Icon (centered vertically)
+        // Background in the content band only
+        gg.fill(left, contentTop, left + rowWidth, contentBottom, hovered ? 0x33FFFFFF : 0x22000000);
+
+        // Icon sits exactly in the 16px content band
         int iconX = left + 2;
-        int iconY = top + (rowHeight - 16) / 2;
+        int iconY = top + 1;
         gg.renderItem(this.icon, iconX, iconY);
         gg.renderItemDecorations(mc.font, this.icon, iconX, iconY);
 
-        // Name (left)
-        gg.drawString(mc.font, this.name, left + 24, top + 6, 0xFFFFFF, false);
+        // Text baseline looks centered in the 16px band
+        int textY = contentTop + 6;
 
-        // Amount | Cost (right), colored by affordability
+        // Name (dim if category locked)
+        int nameColor = categoryUnlocked ? 0xFFFFFFFF : 0xFFB0B0B0;
+        gg.drawString(mc.font, this.name, left + 24, textY, nameColor, false);
+
+        // Amount | Cost (right)
         String rightText = "x" + Math.max(1, this.data.amount()) + "  |  " + this.data.cost();
-        int priceColor = affordable ? 0xFFD966 : 0xFF5555; // gold vs red
+        int priceColor = !categoryUnlocked ? 0xFFB0B0B0 : (affordable ? 0xFFF1C232 : 0xFFFF5555);
         int rx = left + rowWidth - 6 - mc.font.width(rightText);
-        gg.drawString(mc.font, rightText, rx, top + 6, priceColor, false);
+        gg.drawString(mc.font, rightText, rx, textY, priceColor, false);
 
-        // Subtle red overlay when not affordable
-        if (!affordable) {
-            gg.fill(left, top, left + rowWidth, top + rowHeight, 0x1AFF0000);
+        // Overlays limited to content band
+        if (!categoryUnlocked) {
+            gg.fill(left, contentTop, left + rowWidth, contentBottom, 0x66000000);
+        } else if (!affordable) {
+            gg.fill(left, contentTop, left + rowWidth, contentBottom, 0x1AFF0000);
         }
     }
 
@@ -66,6 +77,13 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0) return false;
 
+        // Block click if category isn't unlocked
+        if (!ClientCategories.isUnlocked(this.data.category())) {
+            ClientFX.purchaseError(Component.translatable("questshop.category.locked"));
+            return true;
+        }
+
+        // Then affordability
         if (ClientCoins.get() < this.data.cost()) {
             ClientFX.purchaseError(Component.translatable("questshop.buy.no_coins"));
             return true; // swallow click
