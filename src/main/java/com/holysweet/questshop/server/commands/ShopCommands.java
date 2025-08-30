@@ -1,3 +1,4 @@
+// src/main/java/com/holysweet/questshop/server/commands/ShopCommands.java
 package com.holysweet.questshop.server.commands;
 
 import com.holysweet.questshop.api.ShopCategory;
@@ -6,6 +7,7 @@ import com.holysweet.questshop.api.categories.CategorySetting;
 import com.holysweet.questshop.data.ShopCatalog;
 import com.holysweet.questshop.menu.ShopMenu;
 import com.holysweet.questshop.network.Net;
+import com.holysweet.questshop.server.commands.util.CategoriesCommandUtil; // ← added
 import com.holysweet.questshop.service.CategoriesService;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -20,7 +22,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.item.Item;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -56,8 +57,10 @@ public final class ShopCommands {
                 .then(Commands.literal("list-entries")
                         .requires(src -> src.hasPermission(2))
                         .then(Commands.argument("category", ResourceLocationArgument.id())
+                                .suggests(CategoriesCommandUtil.CATEGORY_SUGGESTIONS) // ← added
                                 .executes(ctx -> {
-                                    ResourceLocation catId = ResourceLocationArgument.getId(ctx, "category");
+                                    ResourceLocation raw = ResourceLocationArgument.getId(ctx, "category");
+                                    ResourceLocation catId = CategoriesCommandUtil.coerceToQS(raw); // ← added
                                     return listEntries(ctx.getSource(), catId);
                                 })));
     }

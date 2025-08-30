@@ -1,4 +1,3 @@
-// src/main/java/com/holysweet/questshop/server/commands/CategoriesCommands.java
 package com.holysweet.questshop.server.commands;
 
 import com.holysweet.questshop.api.ShopCategory;
@@ -69,7 +68,8 @@ public final class CategoriesCommands {
     /** Shared executor for unlock/lock (self or target). */
     private static int execToggle(CommandContext<CommandSourceStack> ctx, ServerPlayer target, boolean unlock) {
         ResourceLocation raw = ResourceLocationArgument.getId(ctx, "category");
-        ResourceLocation id  = CategoriesCommandUtil.resolve(raw);
+        // Normalize once: accept 'building' but convert to 'questshop:building'
+        ResourceLocation id  = CategoriesCommandUtil.coerceToQS(raw);
         return doSet(ctx.getSource(), target, id, unlock);
     }
 
