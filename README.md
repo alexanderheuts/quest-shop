@@ -9,24 +9,32 @@ Inspired by [FTB Money](https://www.curseforge.com/minecraft/mc-mods/ftb-money-f
 🧑‍💻 Developed by: [AquariusSidhe](https://www.curseforge.com/members/aquariussidhe/projects) (GitHub: alexanderheuts)  
 📜 License: MIT
 
-### 🎯 Purpose
+### Purpose
 
 * Provide a fully customizable shop where players can spend earned coins. 
 * Coins can be earned with QuestRewards, or given with commands.
 * Support progression gating — Shop Categories can be (un)locked with commands.
 
-### 🔌 Integrations
+### Integrations
 
 QuestShop works on its own, but offers optional integration with:
 
-* FTB Teams – for shared team progression.
-* FTB Quests – for quest-based rewards or unlocks. 
+* [FTB Teams](https://www.curseforge.com/minecraft/mc-mods/ftb-teams-forge) – for shared team progression.
+* [FTB Quests](https://www.curseforge.com/minecraft/mc-mods/ftb-quests-forge) – for quest-based rewards or unlocks. 
 
 _No hard dependencies: packs can include QuestShop standalone or alongside these mods._
 
 ---
 
-### ⚙️ Shop Configuration
+### Commands
+
+All in-game commands are attached under: ```/hqs```
+
+To open the shop use: ```/hqs shop```
+
+---
+
+### Shop Configuration
 
 All shop content is defined via datapacks.
 
