@@ -3,11 +3,17 @@
 QuestShop is a lightweight Minecraft (NeoForge) mod that provides an in-game shop and reward progression system.
 It is designed for modpack makers to support controlled item access, team play, and quest progression.
 
+Inspired by [FTB Money](https://www.curseforge.com/minecraft/mc-mods/ftb-money-forge).
+
+👩‍💻 Author: [Holysweet](https://www.curseforge.com/members/holysweet/projects)  
+🧑‍💻 Developed by: [AquariusSidhe](https://www.curseforge.com/members/aquariussidhe/projects) (GitHub: alexanderheuts)  
+📜 License: MIT
+
 ### 🎯 Purpose
 
-* Provide a configurable shop where players can spend earned rewards. 
-* Support progression gating — rewards and purchases can be tied to team progress or quest completion.
-* Stay lightweight and flexible for modpack integration.
+* Provide a fully customizable shop where players can spend earned coins. 
+* Coins can be earned with QuestRewards, or given with commands.
+* Support progression gating — Shop Categories can be (un)locked with commands.
 
 ### 🔌 Integrations
 
@@ -69,14 +75,14 @@ data/yourpack/questshop/shop_entries/building_basic.json
 Folder structure (datapack):
 ```
 (your_datapack)/
-pack.mcmeta
-data/
-  yourpack/
-    questshop/
-      shop_categories/
-        building.json
-      shop_entries/
-        building_basic.json
+  pack.mcmeta
+  data/
+    yourpack/
+      questshop/
+        shop_categories/
+          building.json
+        shop_entries/
+          building_basic.json
 ```
 
 See [repository](https://github.com/alexanderheuts/quest-shop/tree/main/src/main/resources/datapacks/questshop_examples) for example datapack.
