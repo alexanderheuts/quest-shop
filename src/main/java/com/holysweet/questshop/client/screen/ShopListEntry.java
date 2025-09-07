@@ -5,6 +5,7 @@ import com.holysweet.questshop.client.ClientCoins;
 import com.holysweet.questshop.client.ClientFX;
 import com.holysweet.questshop.client.ClientCategories; // needs to expose isUnlocked(ResourceLocation)
 import com.holysweet.questshop.network.payload.BuyEntryPayload;
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -15,10 +16,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.util.Optional;
 
 public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
+    public static final Logger LOGGER = LogUtils.getLogger();
     private final ShopEntry data;
     private final Minecraft mc = Minecraft.getInstance();
     private final ItemStack icon;
@@ -39,9 +42,9 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
         boolean categoryUnlocked = ClientCategories.isUnlocked(this.data.category());
         boolean affordable = ClientCoins.get() >= this.data.cost();
 
-        // Keep entry content in an 18px band: 1 top pad, 16 content, 1 bottom pad
+
         final int contentTop    = top;
-        final int contentBottom = top + 18; // exclusive (top + 1 + 16 + 1)
+        final int contentBottom = top + rowHeight;
 
         // Background in the content band only
         gg.fill(left, contentTop, left + rowWidth, contentBottom, hovered ? 0x33FFFFFF : 0x22000000);
@@ -75,24 +78,27 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button != 0) return false;
+        var over = this.isMouseOver(mouseX, mouseY);
 
-        // Block click if category isn't unlocked
-        if (!ClientCategories.isUnlocked(this.data.category())) {
-            ClientFX.purchaseError(Component.translatable("questshop.category.locked"));
-            return true;
-        }
-
-        // Then affordability
-        if (ClientCoins.get() < this.data.cost()) {
-            ClientFX.purchaseError(Component.translatable("questshop.buy.no_coins"));
-            return true; // swallow click
-        }
-
-        PacketDistributor.sendToServer(new BuyEntryPayload(
-                this.data.itemId(), this.data.amount(), this.data.cost(), this.data.category()
-        ));
-        return true;
+        LOGGER.debug("[ShopListEntry] mouseClicked({}, {}, {}) => over={}, focused={}", mouseX, mouseY, button, over, this.isFocused());
+//        if (button != 0) return false;
+//
+//        // Block click if category isn't unlocked
+//        if (!ClientCategories.isUnlocked(this.data.category())) {
+//            ClientFX.purchaseError(Component.translatable("questshop.category.locked"));
+//            return true;
+//        }
+//
+//        // Then affordability
+//        if (ClientCoins.get() < this.data.cost()) {
+//            ClientFX.purchaseError(Component.translatable("questshop.buy.no_coins"));
+//            return true; // swallow click
+//        }
+//
+//        PacketDistributor.sendToServer(new BuyEntryPayload(
+//                this.data.itemId(), this.data.amount(), this.data.cost(), this.data.category()
+//        ));
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
