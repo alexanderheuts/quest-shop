@@ -1,14 +1,18 @@
 package com.holysweet.questshop.client.screen;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.util.List;
 
 public class ShopList extends ObjectSelectionList<ShopListEntry> {
+    public static final Logger LOGGER = LogUtils.getLogger();
+    private boolean thumbDrag;
     private double thumbGrabOffset;
 
     public ShopList(Minecraft mc, int width, int listHeight, int top, int itemHeight) {
@@ -34,15 +38,16 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
           */
 
         // Guard against empty list or no scroll amount
-        if( this.isDragging() ) {
+        if( this.thumbDrag ) {
             if( this.getMaxPosition() <= 0 || this.getMaxScroll() == 0) {
-                this.setDragging(false);
+                this.thumbDrag = false;
             }
         }
 
-        if( this.isDragging() ) {
+        if( this.thumbDrag ) {
             var newScroll = getNewScroll(mouseY);
             this.setScrollAmount(newScroll);
+            LOGGER.debug("[ShopList] renderWidget() => isDragging= {}, mouseY={}, newScroll={}", this.thumbDrag, mouseY, newScroll);
         }
 
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
@@ -68,9 +73,12 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        var over = this.isMouseOver(mouseX, mouseY);
+        LOGGER.debug("[ShopList] mouseClicked({}, {}, {}) => over={}, focused={}", mouseX, mouseY, button, over, this.isFocused());
+
         if( this.checkHitScrollbar(mouseX, mouseY) ) {
             if( this.checkHitThumb(mouseX, mouseY) ) {
-                this.setDragging(true);
+                this.thumbDrag = true;
                 this.thumbGrabOffset = mouseY - this.getThumbTop();
                 return true;
             } else {
@@ -84,8 +92,8 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if( this.isDragging() ) {
-            this.setDragging(false);
+        if( this.thumbDrag ) {
+            this.thumbDrag = false;
             return true;
         }
 
@@ -98,8 +106,15 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         var scrollTop = this.getY();
         var scrollBottom = this.getBottom();
 
-        return mouseX >= scrollLeft && mouseX < scrollRight
-                && mouseY >= scrollTop && mouseY < scrollBottom;
+        LOGGER.debug("[ShopList] checkHitScrollbar({}, {}) => left={}, right={}, top={}, bottom={}", mouseX, mouseY, scrollLeft, scrollRight, scrollTop, scrollBottom);
+
+        if (mouseX >= scrollLeft && mouseX < scrollRight && mouseY >= scrollTop && mouseY < scrollBottom) {
+            LOGGER.debug("[ShopList] checkHitScrollbar() => scrollbar hit");
+            return true;
+        } else {
+            LOGGER.debug("[ShopList] checkHitScrollbar() => scrollbar missed");
+            return false;
+        }
     }
 
     /**
@@ -116,10 +131,17 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         var thumbHeight = this.getThumbHeight();
         var thumbYPos = this.getThumbTop();
 
+        LOGGER.debug("[ShopList] checkHitThumb({}, {}) => left={}, right={}, height={}, YPos={}", mouseX, mouseY, thumbLeft, thumbRight, thumbHeight, thumbYPos);
+
         var thumbBottom = thumbYPos + thumbHeight;
 
-        return mouseX >= thumbLeft && mouseX < thumbRight
-                && mouseY >= thumbYPos && mouseY < thumbBottom;
+        if (mouseX >= thumbLeft && mouseX < thumbRight && mouseY >= thumbYPos && mouseY < thumbBottom) {
+            LOGGER.debug("[ShopList] checkHitThumb() => thumb hit");
+            return true;
+        } else {
+            LOGGER.debug("[ShopList] checkHitThumb() => thumb missed");
+            return false;
+        }
     }
 
     /**
@@ -130,6 +152,8 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
      * @return true when page scroll has been applied
      */
     private boolean pageScroll(double mouseX, double mouseY) {
+        LOGGER.debug("[ShopList] pageScroll({}, {}) called", mouseX, mouseY);
+
         // Validate we hit the scrollbar and not the thumb, otherwise return false.
         if(!this.checkHitScrollbar(mouseX, mouseY) || this.checkHitThumb(mouseX, mouseY)) return false;
 
@@ -156,6 +180,8 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
                 0,
                 this.getMaxScroll()
                 );
+
+        LOGGER.debug("[ShopList] pageScroll() => direction={}, scrollAmount={}", direction, scrollAmount);
 
         this.setScrollAmount(scrollAmount);
 
