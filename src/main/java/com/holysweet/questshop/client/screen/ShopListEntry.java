@@ -34,11 +34,13 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
         this.icon = new ItemStack(opt.orElse(Items.BARRIER), 1);
         this.name = opt.map(i -> Component.translatable(i.getDescriptionId()))
                 .orElse(Component.literal(entry.itemId().toString()));
+
     }
 
     @Override
     public void render(GuiGraphics gg, int index, int top, int left, int rowWidth, int rowHeight,
                        int mouseX, int mouseY, boolean hovered, float partialTick) {
+        LOGGER.debug("[ShopListEntry] render() => index={}, left={}, top={}, width={}, height={}", index, left, top, rowWidth, rowHeight);
         boolean categoryUnlocked = ClientCategories.isUnlocked(this.data.category());
         boolean affordable = ClientCoins.get() >= this.data.cost();
 

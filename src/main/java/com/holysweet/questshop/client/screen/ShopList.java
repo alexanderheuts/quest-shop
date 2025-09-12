@@ -17,6 +17,11 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
 
     public ShopList(Minecraft mc, int width, int listHeight, int top, int itemHeight) {
         super(mc, width, listHeight, top, itemHeight);
+        LOGGER.debug("[ShopList] width={}, listHeight={}, top={}, itemHeight={}", width, listHeight, top, itemHeight);
+        LOGGER.debug("[ShopList] rowLeft={}, rowRight={}, rowWidth={}", this.getRowLeft(), this.getRowRight(), this.getRowWidth());
+        LOGGER.debug("[ShopList] X={}, Y={}, width={}, scrollPos={}", this.getX(), this.getY(), this.getWidth(), this.getScrollbarPosition());
+
+
     }
 
     /** Public helper since addEntry is protected. */
@@ -32,6 +37,8 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
 
     @Override
     public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+//        LOGGER.debug("[ShopList] renderWidget() => rowLeft={}, rowRight={}, rowWidth={}", this.getRowLeft(), this.getRowRight(), this.getRowWidth());
+//        LOGGER.debug("[ShopList] renderWidget() => X={}, Y={}, width={}, scrollPos={}", this.getX(), this.getY(), this.getWidth(), this.getScrollbarPosition());
         /**
          * NOTE: Neoforge 21.1.* has broken mouseDragged, onDrag, mouseMoved events.
          * Handling scrolldragging in render until otherwise fixable.
@@ -51,6 +58,45 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         }
 
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    protected void renderListItems(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderListItems(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    protected void renderItem(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, int index, int left, int top, int width, int height) {
+        final int scrollPx   = Mth.floor(this.getScrollAmount());
+        final int contentTop = this.getY();
+        final int rowTop     = contentTop - scrollPx + index * this.itemHeight;
+
+        LOGGER.debug("[ShopList] renderItem() => index={}, left={}, top={}, width={}, height={}", index, left, rowTop, width, this.itemHeight);
+
+        super.renderItem(guiGraphics, mouseX, mouseY, partialTick, index, left, rowTop, width, this.itemHeight);
+    }
+
+    @Override
+    protected void renderSelection(@NotNull GuiGraphics guiGraphics, int top, int width, int height, int outerColor, int innerColor) {
+        final ShopListEntry sel = this.getSelected();
+        if (sel == null) return;
+
+        final int index = this.children().indexOf(sel);
+        if (index < 0) return;
+
+        final int scrollPx   = Mth.floor(this.getScrollAmount());
+        final int contentTop = this.getY();
+        final int rowTop     = contentTop - scrollPx + index * this.itemHeight;
+        final int rowBottom  = rowTop + this.itemHeight;
+
+        // innerColor/outerColor come from caller; you can ignore and use your own constants.
+        guiGraphics.fill(this.getRowLeft(), rowTop, this.getRowRight(), rowBottom, 0xFF91741E);
+
+        // Optional crisp outline when running a very tight layout:
+        guiGraphics.fill(this.getRowLeft(), rowTop, this.getRowRight(), rowTop + 1, 0xFFF1C232);          // top
+        guiGraphics.fill(this.getRowLeft(), rowBottom - 1, this.getRowRight(), rowBottom, 0xFFF1C232);       // bottom
+
+        //super.renderSelection(guiGraphics, top, width, height, outerColor, innerColor);
     }
 
     private double getNewScroll(int mouseY) {
@@ -214,4 +260,23 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         }
     }
 
+    @Override
+    public int getRowLeft() {
+        return this.getX();
+    }
+
+    @Override
+    public int getRowRight() {
+        return this.getX() + this.getWidth() - SCROLLBAR_WIDTH;
+    }
+
+    @Override
+    public int getRowWidth() {
+        return this.getWidth() - SCROLLBAR_WIDTH;
+    }
+
+    @Override
+    protected int getScrollbarPosition() {
+        return this.getX() + this.getWidth() - SCROLLBAR_WIDTH;
+    }
 }
