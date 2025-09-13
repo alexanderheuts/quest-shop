@@ -7,6 +7,7 @@ import com.holysweet.questshop.client.ClientFX;
 import com.holysweet.questshop.menu.ShopMenu;
 import com.holysweet.questshop.network.payload.BuyEntryPayload;
 import com.holysweet.questshop.network.payload.BuyResultPayload;
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -17,11 +18,16 @@ import net.minecraft.world.entity.player.Inventory;
 import com.holysweet.questshop.client.ClientShopData;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
 
+    public static final Logger LOGGER = LogUtils.getLogger();
+
     private static final int FOOTER_HEIGHT = 28;
     private static final int HEADER_HEIGHT = 24;
+    private static final int MARGIN = 16;
+    private static final int WIDTH = 248;
 
     private ShopList list;
 
@@ -30,14 +36,15 @@ public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
 
     public ShopMenuScreen(ShopMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth = 248; // logical width only
-        this.imageHeight = 180;
-        this.imageHeight += FOOTER_HEIGHT; // reserve footer for Buy button (20px) + 8px padding
+        this.imageWidth = WIDTH;
     }
 
     @Override
     protected void init() {
+        this.imageHeight = this.height - 2 * MARGIN;
+
         super.init(); // sets leftPos/topPos
+
         int top = this.topPos + HEADER_HEIGHT;
         int bottom = this.topPos + this.imageHeight - FOOTER_HEIGHT;
         int itemHeight = 18;
