@@ -4,7 +4,6 @@ import com.holysweet.questshop.QuestShop;
 import com.holysweet.questshop.api.ShopEntry;
 import com.holysweet.questshop.client.ClientCategories;
 import com.holysweet.questshop.client.ClientCoins;
-import com.holysweet.questshop.client.ClientFX;
 import com.holysweet.questshop.data.ShopCatalog;
 import com.holysweet.questshop.network.payload.*;
 import com.holysweet.questshop.service.CategoriesService;
@@ -13,7 +12,6 @@ import com.holysweet.questshop.client.ClientShopData;
 import net.minecraft.client.Minecraft;
 import com.holysweet.questshop.client.screen.ShopMenuScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -39,18 +37,19 @@ public final class Net {
 
         // S2C: balance cache (used by the UI)
         reg.playToClient(CoinsBalancePayload.TYPE, CoinsBalancePayload.CODEC, (payload, ctx) ->
-                ctx.enqueueWork(() -> ClientCoins.set(payload.balance()))
+                ctx.enqueueWork(() -> {
+                    ClientCoins.set(payload.balance());
+                    if (Minecraft.getInstance().screen instanceof ShopMenuScreen s) {
+                        s.updateButtonState();
+                    }
+                })
         );
 
         // S2C: buy result feedback
         reg.playToClient(BuyResultPayload.TYPE, BuyResultPayload.CODEC, (payload, ctx) ->
                 ctx.enqueueWork(() -> {
-                    switch (payload.code()) {
-                        case INVALID_ENTRY -> ClientFX.purchaseError(Component.translatable("questshop.buy.invalid"));
-                        case NOT_ENOUGH_COINS -> ClientFX.purchaseError(Component.translatable("questshop.buy.no_coins"));
-                        case NO_INVENTORY_SPACE -> ClientFX.purchaseError(Component.translatable("questshop.buy.no_space"));
-                        case LOCKED_CATEGORY -> ClientFX.purchaseError(Component.translatable("questshop.buy.locked"));
-                        case OK -> { /* handled by BuyOkToastPayload */ }
+                    if (Minecraft.getInstance().screen instanceof ShopMenuScreen s) {
+                        s.onPurchaseResult(payload.code());
                     }
                 })
         );
@@ -69,7 +68,6 @@ public final class Net {
         reg.playToClient(ShopDataPayload.TYPE, ShopDataPayload.CODEC, (payload, ctx) ->
                 ctx.enqueueWork(() -> {
                     ClientShopData.set(payload.entries());
-                    // If shop is open, refresh immediately
                     if (Minecraft.getInstance().screen instanceof ShopMenuScreen s) {
                         s.refreshEntries();
                     }
@@ -78,7 +76,11 @@ public final class Net {
 
         // S2C: purchase OK
         reg.playToClient(BuyOkToastPayload.TYPE, BuyOkToastPayload.CODEC, (payload, ctx) ->
-                ctx.enqueueWork(() -> ClientFX.purchaseOk(payload.itemId(), payload.amount(), payload.cost()))
+                ctx.enqueueWork(() -> {
+                    if (Minecraft.getInstance().screen instanceof ShopMenuScreen s) {
+                        s.onPurchaseOk(payload.itemId(), payload.amount(), payload.cost());
+                    }
+                })
         );
 
         // C2S: buy request

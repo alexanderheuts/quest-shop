@@ -1,47 +1,43 @@
 package com.holysweet.questshop.client.screen;
 
-import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class ShopList extends ObjectSelectionList<ShopListEntry> {
-    public static final Logger LOGGER = LogUtils.getLogger();
+
+    private @Nullable Runnable onSelectionChanged;
+
     private boolean thumbDrag;
     private double thumbGrabOffset;
 
     public ShopList(Minecraft mc, int width, int listHeight, int top, int itemHeight) {
         super(mc, width, listHeight, top, itemHeight);
-        LOGGER.debug("[ShopList] width={}, listHeight={}, top={}, itemHeight={}", width, listHeight, top, itemHeight);
-        LOGGER.debug("[ShopList] rowLeft={}, rowRight={}, rowWidth={}", this.getRowLeft(), this.getRowRight(), this.getRowWidth());
-        LOGGER.debug("[ShopList] X={}, Y={}, width={}, scrollPos={}", this.getX(), this.getY(), this.getWidth(), this.getScrollbarPosition());
-
-
-    }
-
-    /** Public helper since addEntry is protected. */
-    public void add(ShopListEntry entry) {
-        this.addEntry(entry);
     }
 
     public void setEntries(List<ShopListEntry> entries) {
         this.children().clear();
         for (ShopListEntry e : entries) this.addEntry(e);
         this.setScrollAmount(0);
+        this.setSelected(null);
     }
+
+    public void setOnSelectionChanged(@Nullable Runnable cb) {
+        this.onSelectionChanged = cb;
+    }
+
+    /* ---------- UI Rendering ---------- */
 
     @Override
     public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-//        LOGGER.debug("[ShopList] renderWidget() => rowLeft={}, rowRight={}, rowWidth={}", this.getRowLeft(), this.getRowRight(), this.getRowWidth());
-//        LOGGER.debug("[ShopList] renderWidget() => X={}, Y={}, width={}, scrollPos={}", this.getX(), this.getY(), this.getWidth(), this.getScrollbarPosition());
-        /**
-         * NOTE: Neoforge 21.1.* has broken mouseDragged, onDrag, mouseMoved events.
-         * Handling scrolldragging in render until otherwise fixable.
+        /*
+          NOTE: Neoforge 21.1.* has broken mouseDragged, onDrag, mouseMoved events.
+          Handling scrolldragging in render until otherwise fixable.
           */
 
         // Guard against empty list or no scroll amount
@@ -54,30 +50,24 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         if( this.thumbDrag ) {
             var newScroll = getNewScroll(mouseY);
             this.setScrollAmount(newScroll);
-            LOGGER.debug("[ShopList] renderWidget() => isDragging= {}, mouseY={}, newScroll={}", this.thumbDrag, mouseY, newScroll);
         }
 
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderListItems(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderListItems(guiGraphics, mouseX, mouseY, partialTick);
-    }
-
-    @Override
-    protected void renderItem(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, int index, int left, int top, int width, int height) {
+    protected void renderItem(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick,
+                              int index, int left, int top, int width, int height) {
         final int scrollPx   = Mth.floor(this.getScrollAmount());
         final int contentTop = this.getY();
         final int rowTop     = contentTop - scrollPx + index * this.itemHeight;
-
-        LOGGER.debug("[ShopList] renderItem() => index={}, left={}, top={}, width={}, height={}", index, left, rowTop, width, this.itemHeight);
 
         super.renderItem(guiGraphics, mouseX, mouseY, partialTick, index, left, rowTop, width, this.itemHeight);
     }
 
     @Override
-    protected void renderSelection(@NotNull GuiGraphics guiGraphics, int top, int width, int height, int outerColor, int innerColor) {
+    protected void renderSelection(@NotNull GuiGraphics guiGraphics, int top, int width, int height,
+                                   int outerColor, int innerColor) {
         final ShopListEntry sel = this.getSelected();
         if (sel == null) return;
 
@@ -89,14 +79,10 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         final int rowTop     = contentTop - scrollPx + index * this.itemHeight;
         final int rowBottom  = rowTop + this.itemHeight;
 
-        // innerColor/outerColor come from caller; you can ignore and use your own constants.
         guiGraphics.fill(this.getRowLeft(), rowTop, this.getRowRight(), rowBottom, 0xFF91741E);
 
-        // Optional crisp outline when running a very tight layout:
         guiGraphics.fill(this.getRowLeft(), rowTop, this.getRowRight(), rowTop + 1, 0xFFF1C232);          // top
-        guiGraphics.fill(this.getRowLeft(), rowBottom - 1, this.getRowRight(), rowBottom, 0xFFF1C232);       // bottom
-
-        //super.renderSelection(guiGraphics, top, width, height, outerColor, innerColor);
+        guiGraphics.fill(this.getRowLeft(), rowBottom - 1, this.getRowRight(), rowBottom, 0xFFF1C232);
     }
 
     private double getNewScroll(int mouseY) {
@@ -117,11 +103,10 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
             );
     }
 
+    /* ---------- Events ---------- */
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        var over = this.isMouseOver(mouseX, mouseY);
-        LOGGER.debug("[ShopList] mouseClicked({}, {}, {}) => over={}, focused={}", mouseX, mouseY, button, over, this.isFocused());
-
         if( this.checkHitScrollbar(mouseX, mouseY) ) {
             if( this.checkHitThumb(mouseX, mouseY) ) {
                 this.thumbDrag = true;
@@ -146,21 +131,27 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
+    @Override
+    public void setSelected(@Nullable ShopListEntry entry) {
+        ShopListEntry old = this.getSelected();
+
+        super.setSelected(entry);
+
+        if (entry != old && this.onSelectionChanged != null) {
+            this.onSelectionChanged.run();
+        }
+    }
+
+    /* ---------- Scrollbar helpers ---------- */
+
     private boolean checkHitScrollbar(double mouseX, double mouseY) {
         var scrollLeft = this.getScrollbarPosition();
         var scrollRight = scrollLeft + SCROLLBAR_WIDTH;
         var scrollTop = this.getY();
         var scrollBottom = this.getBottom();
 
-        LOGGER.debug("[ShopList] checkHitScrollbar({}, {}) => left={}, right={}, top={}, bottom={}", mouseX, mouseY, scrollLeft, scrollRight, scrollTop, scrollBottom);
-
-        if (mouseX >= scrollLeft && mouseX < scrollRight && mouseY >= scrollTop && mouseY < scrollBottom) {
-            LOGGER.debug("[ShopList] checkHitScrollbar() => scrollbar hit");
-            return true;
-        } else {
-            LOGGER.debug("[ShopList] checkHitScrollbar() => scrollbar missed");
-            return false;
-        }
+        return mouseX >= scrollLeft && mouseX < scrollRight
+                && mouseY >= scrollTop && mouseY < scrollBottom;
     }
 
     /**
@@ -176,18 +167,10 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
 
         var thumbHeight = this.getThumbHeight();
         var thumbYPos = this.getThumbTop();
-
-        LOGGER.debug("[ShopList] checkHitThumb({}, {}) => left={}, right={}, height={}, YPos={}", mouseX, mouseY, thumbLeft, thumbRight, thumbHeight, thumbYPos);
-
         var thumbBottom = thumbYPos + thumbHeight;
 
-        if (mouseX >= thumbLeft && mouseX < thumbRight && mouseY >= thumbYPos && mouseY < thumbBottom) {
-            LOGGER.debug("[ShopList] checkHitThumb() => thumb hit");
-            return true;
-        } else {
-            LOGGER.debug("[ShopList] checkHitThumb() => thumb missed");
-            return false;
-        }
+        return mouseX >= thumbLeft && mouseX < thumbRight
+                && mouseY >= thumbYPos && mouseY < thumbBottom;
     }
 
     /**
@@ -198,8 +181,6 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
      * @return true when page scroll has been applied
      */
     private boolean pageScroll(double mouseX, double mouseY) {
-        LOGGER.debug("[ShopList] pageScroll({}, {}) called", mouseX, mouseY);
-
         // Validate we hit the scrollbar and not the thumb, otherwise return false.
         if(!this.checkHitScrollbar(mouseX, mouseY) || this.checkHitThumb(mouseX, mouseY)) return false;
 
@@ -226,8 +207,6 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
                 0,
                 this.getMaxScroll()
                 );
-
-        LOGGER.debug("[ShopList] pageScroll() => direction={}, scrollAmount={}", direction, scrollAmount);
 
         this.setScrollAmount(scrollAmount);
 
@@ -261,6 +240,13 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
     }
 
     @Override
+    protected int getScrollbarPosition() {
+        return this.getX() + this.getWidth() - SCROLLBAR_WIDTH;
+    }
+
+    /* ---------- Row helpers ---------- */
+
+    @Override
     public int getRowLeft() {
         return this.getX();
     }
@@ -273,10 +259,5 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
     @Override
     public int getRowWidth() {
         return this.getWidth() - SCROLLBAR_WIDTH;
-    }
-
-    @Override
-    protected int getScrollbarPosition() {
-        return this.getX() + this.getWidth() - SCROLLBAR_WIDTH;
     }
 }

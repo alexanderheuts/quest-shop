@@ -2,10 +2,7 @@ package com.holysweet.questshop.client.screen;
 
 import com.holysweet.questshop.api.ShopEntry;
 import com.holysweet.questshop.client.ClientCoins;
-import com.holysweet.questshop.client.ClientFX;
-import com.holysweet.questshop.client.ClientCategories; // needs to expose isUnlocked(ResourceLocation)
-import com.holysweet.questshop.network.payload.BuyEntryPayload;
-import com.mojang.logging.LogUtils;
+import com.holysweet.questshop.client.ClientCategories;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -14,15 +11,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
 
 import java.util.Optional;
 
 public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
-    public static final Logger LOGGER = LogUtils.getLogger();
-    private final ShopEntry data;
+    public final ShopEntry data;
     private final Minecraft mc = Minecraft.getInstance();
     private final ItemStack icon;
     private final Component name;
@@ -40,16 +34,13 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
     @Override
     public void render(GuiGraphics gg, int index, int top, int left, int rowWidth, int rowHeight,
                        int mouseX, int mouseY, boolean hovered, float partialTick) {
-        LOGGER.debug("[ShopListEntry] render() => index={}, left={}, top={}, width={}, height={}", index, left, top, rowWidth, rowHeight);
         boolean categoryUnlocked = ClientCategories.isUnlocked(this.data.category());
         boolean affordable = ClientCoins.get() >= this.data.cost();
 
-
-        final int contentTop    = top;
         final int contentBottom = top + rowHeight;
 
         // Background in the content band only
-        gg.fill(left, contentTop, left + rowWidth, contentBottom, hovered ? 0x33FFFFFF : 0x22000000);
+        gg.fill(left, top, left + rowWidth, contentBottom, hovered ? 0x33FFFFFF : 0x22000000);
 
         // Icon sits exactly in the 16px content band
         int iconX = left + 2;
@@ -58,7 +49,7 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
         gg.renderItemDecorations(mc.font, this.icon, iconX, iconY);
 
         // Text baseline looks centered in the 16px band
-        int textY = contentTop + 6;
+        int textY = top + 6;
 
         // Name (dim if category locked)
         int nameColor = categoryUnlocked ? 0xFFFFFFFF : 0xFFB0B0B0;
@@ -72,35 +63,10 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
 
         // Overlays limited to content band
         if (!categoryUnlocked) {
-            gg.fill(left, contentTop, left + rowWidth, contentBottom, 0x66000000);
+            gg.fill(left, top, left + rowWidth, contentBottom, 0x66000000);
         } else if (!affordable) {
-            gg.fill(left, contentTop, left + rowWidth, contentBottom, 0x1AFF0000);
+            gg.fill(left, top, left + rowWidth, contentBottom, 0x1AFF0000);
         }
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        var over = this.isMouseOver(mouseX, mouseY);
-
-        LOGGER.debug("[ShopListEntry] mouseClicked({}, {}, {}) => over={}, focused={}", mouseX, mouseY, button, over, this.isFocused());
-//        if (button != 0) return false;
-//
-//        // Block click if category isn't unlocked
-//        if (!ClientCategories.isUnlocked(this.data.category())) {
-//            ClientFX.purchaseError(Component.translatable("questshop.category.locked"));
-//            return true;
-//        }
-//
-//        // Then affordability
-//        if (ClientCoins.get() < this.data.cost()) {
-//            ClientFX.purchaseError(Component.translatable("questshop.buy.no_coins"));
-//            return true; // swallow click
-//        }
-//
-//        PacketDistributor.sendToServer(new BuyEntryPayload(
-//                this.data.itemId(), this.data.amount(), this.data.cost(), this.data.category()
-//        ));
-        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
