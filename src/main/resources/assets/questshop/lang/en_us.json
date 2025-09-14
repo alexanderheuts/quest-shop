@@ -1,4 +1,6 @@
 {
+  "item.questshop.coin": "Coin",
+
   "command.questshop.player_only": "This command can only be used by a player.",
   "command.questshop.no_team": "%s is not in a team.",
   "command.questshop.coins_show": "%s's team has %s coins.",

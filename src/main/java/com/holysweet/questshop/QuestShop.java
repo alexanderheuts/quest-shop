@@ -1,7 +1,11 @@
 package com.holysweet.questshop;
 
 import com.holysweet.questshop.integrations.IntegrationBootstrap;
+import com.holysweet.questshop.item.ModItems;
 import com.holysweet.questshop.registry.ModMenuTypes;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -28,7 +32,10 @@ public class QuestShop {
     public QuestShop(IEventBus modEventBus, ModContainer modContainer) {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::addCreative);
+
         ModMenuTypes.MENU_TYPES.register(modEventBus);
+        ModItems.register(modEventBus);
 
         IntegrationBootstrap.bootstrap();
         // Register ourselves for server and other game events we are interested in.
@@ -46,6 +53,11 @@ public class QuestShop {
 
     }
 
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if( event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(ModItems.COIN);
+        }
+    }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
