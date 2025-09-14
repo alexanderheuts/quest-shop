@@ -10,7 +10,7 @@ public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(QuestShop.MODID);
 
     public static final DeferredItem<Item> COIN = ITEMS.register("coin",
-            () -> new Item(new Item.Properties()));
+            () -> new CoinItem(new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
