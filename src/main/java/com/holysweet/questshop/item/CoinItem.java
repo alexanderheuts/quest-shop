@@ -1,5 +1,8 @@
 package com.holysweet.questshop.item;
 
+import com.holysweet.questshop.service.CoinsService;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -31,6 +34,8 @@ public class CoinItem extends Item {
         int amountConsumed = player.isShiftKeyDown() ? itemInHand.getCount() : 1;
         itemInHand.shrink(amountConsumed);
 
+        CoinsService.add((ServerLevel) level, (ServerPlayer) player, amountConsumed);
+        
         if(!itemInHand.isEmpty())
             return InteractionResultHolder.success(itemInHand);
 
