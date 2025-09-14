@@ -1,5 +1,6 @@
 {
   "item.questshop.coin": "Coin",
+  "tooltip.questshop.coin": "§9Right-click to consume. SHIFT+right-click to consume stack.§r",
 
   "command.questshop.player_only": "This command can only be used by a player.",
   "command.questshop.no_team": "%s is not in a team.",
