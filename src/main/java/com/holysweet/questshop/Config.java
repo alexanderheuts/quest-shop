@@ -10,7 +10,7 @@ public class Config {
             .define("lootCoinFromEnemy", true);
 
     public static final ModConfigSpec.DoubleValue LOOT_COIN_DROP_CHANCE = BUILDER
-            .comment("Coin drop chance from enemies. (values: 0 to 1, where 1 is 100% chance. Default: 0.05")
+            .comment("Coin drop chance from enemies.")
             .defineInRange("lootCoinDropChance", 0.05, 0.0, 1.0);
 
     static final ModConfigSpec SPEC = BUILDER.build();
