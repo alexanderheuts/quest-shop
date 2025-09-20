@@ -2,7 +2,7 @@ package com.holysweet.questshop.datagen;
 
 import com.holysweet.questshop.QuestShop;
 import com.holysweet.questshop.item.ModItems;
-import com.holysweet.questshop.loot.AddItemModifier;
+import com.holysweet.questshop.loot.CoinLootModifier;
 import com.holysweet.questshop.loot.conditions.EntityIsEnemyCondition;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -19,7 +19,7 @@ public class ModGlobalLootModifierProvider extends GlobalLootModifierProvider {
     @Override
     protected void start() {
         this.add("coin_from_entities",
-                new AddItemModifier(new LootItemCondition[] {
+                new CoinLootModifier(new LootItemCondition[] {
                         EntityIsEnemyCondition.entityIsMonster().build()
                 }, ModItems.COIN.get()));
     }

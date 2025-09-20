@@ -1,5 +1,5 @@
 {
-  "type": "questshop:add_item",
+  "type": "questshop:coin_loot",
   "conditions": [
     {
       "condition": "questshop:entity_is_enemy"

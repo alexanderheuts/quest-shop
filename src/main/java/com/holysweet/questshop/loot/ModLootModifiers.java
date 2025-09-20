@@ -14,7 +14,7 @@ public class ModLootModifiers {
             DeferredRegister.create(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, QuestShop.MODID);
 
     public static final Supplier<MapCodec<? extends IGlobalLootModifier>> ADD_ITEM =
-            LOOT_MODIFIER_SERIALIZERS.register("add_item", () -> AddItemModifier.CODEC);
+            LOOT_MODIFIER_SERIALIZERS.register("coin_loot", () -> CoinLootModifier.CODEC);
 
     public static void register(IEventBus eventBus) {
         LOOT_MODIFIER_SERIALIZERS.register(eventBus);
