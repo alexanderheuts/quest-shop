@@ -1,0 +1,3 @@
+// 1.21.1	2025-09-20T14:06:52.0822475	Global Loot Modifiers : questshop
+d14325ad53bc775d3b18db789ddc7b4c8e59b572 data/neoforge/loot_modifiers/global_loot_modifiers.json
+46828df3fa1cb4bf990823d9cfa01b879222d8ef data/questshop/loot_modifiers/coin_from_entities.json

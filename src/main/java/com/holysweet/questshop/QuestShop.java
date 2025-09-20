@@ -2,6 +2,8 @@ package com.holysweet.questshop;
 
 import com.holysweet.questshop.integrations.IntegrationBootstrap;
 import com.holysweet.questshop.item.ModItems;
+import com.holysweet.questshop.loot.LootConditions;
+import com.holysweet.questshop.loot.ModLootModifiers;
 import com.holysweet.questshop.registry.ModMenuTypes;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -36,6 +38,9 @@ public class QuestShop {
 
         ModMenuTypes.MENU_TYPES.register(modEventBus);
         ModItems.register(modEventBus);
+
+        LootConditions.CONDITIONS.register(modEventBus);
+        ModLootModifiers.register(modEventBus);
 
         IntegrationBootstrap.bootstrap();
         // Register ourselves for server and other game events we are interested in.

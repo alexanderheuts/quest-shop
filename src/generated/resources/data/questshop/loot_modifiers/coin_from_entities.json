@@ -1,0 +1,9 @@
+{
+  "type": "questshop:add_item",
+  "conditions": [
+    {
+      "condition": "questshop:entity_is_enemy"
+    }
+  ],
+  "item": "questshop:coin"
+}
