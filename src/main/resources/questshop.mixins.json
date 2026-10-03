@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.holysweet.questshop.integrations.ftbquests.mixin",
+  "plugin": "com.holysweet.questshop.integrations.ftbquests.mixin.FTBQuestsMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "OtherButtonsPanelTopMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
