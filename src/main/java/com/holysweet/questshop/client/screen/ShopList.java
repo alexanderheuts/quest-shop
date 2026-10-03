@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ShopList extends ObjectSelectionList<ShopListEntry> {
+public class ShopList extends ObjectSelectionList<BaseShopListEntry> {
 
     private @Nullable Runnable onSelectionChanged;
 
@@ -20,9 +20,9 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
         super(mc, width, listHeight, top, itemHeight);
     }
 
-    public void setEntries(List<ShopListEntry> entries) {
+    public void setEntries(List<BaseShopListEntry> entries) {
         this.children().clear();
-        for (ShopListEntry e : entries) this.addEntry(e);
+        for (BaseShopListEntry e : entries) this.addEntry(e);
         this.setScrollAmount(0);
         this.setSelected(null);
     }
@@ -68,8 +68,8 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
     @Override
     protected void renderSelection(@NotNull GuiGraphics guiGraphics, int top, int width, int height,
                                    int outerColor, int innerColor) {
-        final ShopListEntry sel = this.getSelected();
-        if (sel == null) return;
+        final BaseShopListEntry sel = this.getSelected();
+        if (sel == null || !sel.isSelectable()) return;
 
         final int index = this.children().indexOf(sel);
         if (index < 0) return;
@@ -132,9 +132,12 @@ public class ShopList extends ObjectSelectionList<ShopListEntry> {
     }
 
     @Override
-    public void setSelected(@Nullable ShopListEntry entry) {
-        ShopListEntry old = this.getSelected();
-
+    public void setSelected(@Nullable BaseShopListEntry entry) {
+        // If it's a header it shouldn't be selectable
+        if (entry != null && !entry.isSelectable()) {
+            return;
+        }
+        BaseShopListEntry old = this.getSelected();
         super.setSelected(entry);
 
         if (entry != old && this.onSelectionChanged != null) {

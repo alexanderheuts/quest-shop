@@ -20,6 +20,9 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
 
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -76,7 +79,33 @@ public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
     }
 
     public void refreshEntries() {
-        var rows = ClientShopData.get().stream().map(ShopListEntry::new).toList();
+        List<BaseShopListEntry> rows = new ArrayList<>();
+
+        // 1. Group catalog items by their category ID
+        Map<ResourceLocation, List<ShopEntry>> grouped = ClientShopData.get().stream()
+                .collect(Collectors.groupingBy(
+                        ShopEntry::category,
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        // 2. Sort the categories by order defined in JSON, falling back to name/path for ties
+        List<ResourceLocation> sortedCategories = new ArrayList<>(grouped.keySet());
+        sortedCategories.sort(
+                Comparator.comparingInt(ClientCategories::getOrder)
+                        .thenComparing(ResourceLocation::getPath)
+        );
+
+        // 3. Flatten into entries with the header preceding each category group
+        for (ResourceLocation catId : sortedCategories) {
+            String displayName = ClientCategories.getDisplayName(catId);
+            rows.add(new CategoryHeaderEntry(catId, displayName));
+
+            for (ShopEntry item : grouped.get(catId)) {
+                rows.add(new ShopListEntry(item));
+            }
+        }
+
         this.list.setEntries(rows);
     }
 
@@ -139,8 +168,8 @@ public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
 
         if (!this.purchasePending) {
             var selected = (this.list != null) ? this.list.getSelected() : null;
-            if (selected != null) {
-                ShopEntry entry = selected.data;
+            if (selected instanceof ShopListEntry itemEntry) {
+                ShopEntry entry = itemEntry.data;
                 active = ClientCategories.isUnlocked(entry.category())
                         && ClientCoins.get() >= entry.cost();
             }
@@ -156,13 +185,13 @@ public class ShopMenuScreen extends AbstractContainerScreen<ShopMenu> {
         button.active = false;
 
         var selected = (this.list != null) ? this.list.getSelected() : null;
-        if (selected == null) {
+        if (!(selected instanceof ShopListEntry itemEntry)) {
             purchasePending = false;
             updateButtonState();
             return;
         }
 
-        ShopEntry entry = selected.data;
+        ShopEntry entry = itemEntry.data;
         PacketDistributor.sendToServer(new BuyEntryPayload(
                 entry.itemId(), entry.amount(), entry.cost(), entry.category()
         ));

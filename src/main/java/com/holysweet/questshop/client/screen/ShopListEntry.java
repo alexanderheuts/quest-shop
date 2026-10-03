@@ -5,7 +5,6 @@ import com.holysweet.questshop.client.ClientCoins;
 import com.holysweet.questshop.client.ClientCategories;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -15,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
+public class ShopListEntry extends BaseShopListEntry {
     public final ShopEntry data;
     private final Minecraft mc = Minecraft.getInstance();
     private final ItemStack icon;

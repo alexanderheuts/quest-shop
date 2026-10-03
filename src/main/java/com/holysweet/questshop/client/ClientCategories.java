@@ -31,4 +31,21 @@ public final class ClientCategories {
     public static Map<ResourceLocation, ShopCategory> categories() {
         return CATEGORIES;
     }
+
+    /**
+     * Getters
+     */
+    public static Optional<ShopCategory> get(ResourceLocation categoryId) {
+        return Optional.ofNullable(CATEGORIES.get(categoryId));
+    }
+
+    public static int getOrder(ResourceLocation categoryId) {
+        ShopCategory cat = CATEGORIES.get(categoryId);
+        return cat != null ? cat.order() : Integer.MAX_VALUE;
+    }
+
+    public static String getDisplayName(ResourceLocation categoryId) {
+        ShopCategory cat = CATEGORIES.get(categoryId);
+        return cat != null ? cat.display() : "";
+    }
 }
