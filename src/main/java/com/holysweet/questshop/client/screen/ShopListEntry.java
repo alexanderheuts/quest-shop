@@ -26,7 +26,7 @@ public class ShopListEntry extends ObjectSelectionList.Entry<ShopListEntry> {
 
         Optional<Item> opt = BuiltInRegistries.ITEM.getOptional(entry.itemId());
         this.icon = new ItemStack(opt.orElse(Items.BARRIER), 1);
-        this.name = opt.map(i -> Component.translatable(i.getDescriptionId()))
+        this.name = opt.map(i -> new ItemStack(i).getHoverName())
                 .orElse(Component.literal(entry.itemId().toString()));
 
     }
