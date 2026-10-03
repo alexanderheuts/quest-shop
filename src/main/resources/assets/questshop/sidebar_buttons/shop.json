@@ -1,0 +1,13 @@
+{
+  "icon": [
+    "questshop:textures/item/coin.png"
+  ],
+  "sort_index": 1000,
+  "click": [
+    "command:/hqs shop"
+  ],
+  "required_mods": [
+    "questshop"
+  ]
+
+}

@@ -27,5 +27,7 @@
   "reward.questshop.category.title.lock": "Lock category %s",
 
   "ftbquests.reward.questshop.coins": "Coins",
-  "ftbquests.reward.questshop.category": "Category"
+  "ftbquests.reward.questshop.category": "Category",
+
+  "sidebar_button.questshop.shop": "Quest Shop"
 }
